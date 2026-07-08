@@ -1,0 +1,48 @@
+--For this project, I'm utilizing SQL to query a database on sales and metrics
+
+--How many many unique orders were placed in January? In other words, how many distinct order ids do we have?
+select count(distinct orderid) as unique_orders_jan
+from BIT_DB.JanSales
+where length(orderid) = 6
+and orderid <> 'Order ID';
+
+--How many of those orders were for an iPhone?
+select count(distinct orderid) as iphone_orders_jan
+from BIT_DB.JanSales
+where Product='iPhone'
+and length(orderid) = 6
+and orderid <> 'Order ID';
+
+--Select the customer account numbers for all the orders that were placed in February.
+select distinct acctnum as customers_feb
+from BIT_DB.customers cust
+join BIT_DB.FebSales Feb
+on cust.order_id=FEB.orderid
+where length(orderid) = 6
+and orderid <> 'Order ID';
+
+--Which product was the cheapest one sold in January, and what was the price?
+select distinct product, price
+from bit_db.JanSales
+where price in (select min(price) 
+from bit_db.JanSales);
+
+--What is the total revenue for each product sold in January?
+select product, sum((quantity)*price) as revenue
+from BIT_DB.JanSales
+group by product;
+
+--Which products were sold in February at 548 Lincoln St, Seattle, WA 98101, how many of each were sold, and what was the total revenue?
+select product, sum(quantity) as items_sold, sum((quantity)*price) as revenue
+from bit_db.febsales
+where location = '548 Lincoln St, Seattle, WA 98101'
+group by product;
+
+--How many customers ordered more than 2 products at a time in February, and what was the average amount spent for those customers?
+select count(cust.acctnum) as customers, round(avg(quantity*price), 2) as avg_amt_spent
+from bit_db.FebSales as feb
+join bit_db.customers as cust
+on feb.orderID = cust.order_id
+where feb.Quantity >= 2
+and length(orderid) = 6
+and orderid <> 'Order ID';
